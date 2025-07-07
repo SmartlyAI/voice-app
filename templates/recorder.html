@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enregistrement | Plateforme Linguistique</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Ancizar+Sans:ital,wght@0,100..1000;1,100..1000&family=Josefin+Sans:ital,wght@0,100..700;1,100..700&family=Lora:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --font-primary: "Ancizar Sans", sans-serif; --font-secondary: "Josefin Sans", sans-serif; --font-display: "Lora", serif; --color-text-primary: #1f2937; --color-text-secondary: #4b5563; --color-text-subtle: #6b7280; --color-text-inverse: #ffffff; --color-bg-page: #f9fafb; --color-bg-container: #ffffff; --color-bg-alt: #f3f4f6; --color-border: #e5e7eb; --color-border-focus: #3b82f6; --color-primary: #2563eb; --color-primary-hover: #1d4ed8; --color-dark: #1f2937; --color-dark-hover: #111827; --color-success: #16a34a; --color-success-hover: #15803d; --color-success-light: #d1fae5; --color-success-text: #065f46; --color-warning: #d97706; --color-warning-light: #fef3c7; --color-warning-text: #92400e; --color-danger: #dc2626; --color-danger-hover: #b91c1c; --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1); --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1); --border-radius-md: 8px; --border-radius-lg: 16px; --nav-button-offset: 20px; }
+    body { font-family: var(--font-primary); font-optical-sizing: auto; background-color: var(--color-bg-page); background-image: radial-gradient(var(--color-border) 0.5px, transparent 0.5px); background-size: 15px 15px; margin: 0; padding: 30px var(--nav-button-offset); color: var(--color-text-primary); line-height: 1.6; }
+    .container { max-width: 960px; margin: 0 auto; background: var(--color-bg-container); padding: 40px 50px; border-radius: var(--border-radius-lg); box-shadow: var(--shadow-lg); border: 1px solid var(--color-border); position: relative; }
+    .page-header-section { padding-bottom: 30px; margin-bottom: 40px; border-bottom: 1px solid var(--color-border); text-align: center; }
+    h1 { font-family: var(--font-display); font-size: 34px; font-weight: 600; margin-top: 0; margin-bottom: 10px; color: var(--color-text-primary); }
+    p.subtitle { font-size: 18px; color: var(--color-text-secondary); margin-bottom: 25px; line-height: 1.7; max-width: 700px; margin-left: auto; margin-right: auto; }
+    .arabic-label-subtitle { font-size: 16px; color: var(--color-text-subtle); display: block; margin-top: 6px; }
+    .phrase-counter { font-size: 15px; color: var(--color-text-subtle); margin-bottom: 15px; font-weight: 500; }
+    .progress-indicator { width: 100%; max-width: 400px; margin-left: auto; margin-right: auto; height: 10px; background-color: var(--color-border); border-radius: 5px; overflow: hidden; }
+    .progress-indicator-fill { height: 100%; background-color: var(--color-primary); border-radius: 5px; transition: width 0.4s cubic-bezier(0.65, 0, 0.35, 1); }
+    .phrase-block { margin-bottom: 45px; padding: 0; }
+    .phrase-block label { font-weight: 600; font-size: 18px; color: var(--color-text-primary); display: block; margin-bottom: 12px; }
+    .phrase-block label .arabic-label { font-size: 0.9em; font-weight: normal; color: var(--color-text-secondary); }
+    .phrase-text { font-family: var(--font-secondary); font-size: 19px; color: var(--color-text-primary); border-left: 5px solid var(--color-primary); padding: 14px 18px; background-color: var(--color-bg-alt); border-radius: 6px; line-height: 1.7; }
+    .phrase-text.arabic { font-size: 21px; direction: rtl; text-align: right; font-family: 'Noto Naskh Arabic', 'Traditional Arabic', serif; }
+    .form-section-label { font-weight: 600; font-size: 17px; color: var(--color-text-primary); display: block; margin-bottom: 10px; }
+    .form-section-label .arabic-label { font-size: 0.9em; font-weight: normal; color: var(--color-text-secondary); }
+    .buttons { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 18px; margin-top: 35px; margin-bottom: 35px; }
+    .buttons button { padding: 15px 22px; font-size: 16px; font-weight: 500; border: none; border-radius: var(--border-radius-md); color: var(--color-text-inverse); cursor: pointer; transition: background-color 0.2s ease-out, transform 0.1s ease-out; text-align: center; }
+    .buttons button:hover { transform: translateY(-1px); }
+    .buttons button:active { transform: translateY(0px); }
+    #start { background-color: var(--color-dark); } #start:hover { background-color: var(--color-dark-hover); }
+    #stop { background-color: var(--color-danger); } #stop:hover { background-color: var(--color-danger-hover); }
+    #play { background-color: var(--color-primary); } #play:hover { background-color: var(--color-primary-hover); }
+    #valider { background-color: var(--color-success); } #valider:hover { background-color: var(--color-success-hover); }
+    #start:disabled, #stop:disabled, #play:disabled, #valider:disabled { background-color: #9ca3af; cursor: not-allowed; transform: none; }
+    .buttons button span[dir="rtl"] { margin-left: 4px; }
+    .audio-container, .reference-audio-container { margin-top: 30px; padding: 20px; background-color: var(--color-bg-alt); border-radius: var(--border-radius-md); border: 1px solid var(--color-border); }
+    audio { width: 100%; margin-top: 10px; }
+    .navigation { display: none; }
+    .fixed-nav-button { position: fixed; top: 50%; transform: translateY(-50%); z-index: 1000; background-color: var(--color-primary); color: var(--color-text-inverse); border: none; border-radius: var(--border-radius-md); width: auto; height: auto; padding: 10px 15px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background-color 0.2s ease-out; font-size: 15px; line-height: 1.4; white-space: nowrap; }
+    .fixed-nav-button:hover { background-color: var(--color-primary-hover); }
+    .fixed-nav-button.fixed-nav-prev { left: var(--nav-button-offset); }
+    .fixed-nav-button.fixed-nav-prev .icon { margin-right: 8px; font-size: 18px; }
+    .fixed-nav-button.fixed-nav-next { right: var(--nav-button-offset); }
+    .fixed-nav-button.fixed-nav-next .icon { margin-left: 8px; font-size: 18px; }
+    .fixed-nav-button:disabled { background-color: var(--color-text-subtle); cursor: not-allowed; opacity: 0.6; transform: translateY(-50%); }
+    .fixed-nav-button:disabled:hover { background-color: var(--color-text-subtle); }
+    .fixed-nav-button .icon, .fixed-nav-button .nav-text { display: inline-block; }
+    .fixed-nav-button .nav-text span[dir="rtl"] { margin-left: 4px; }
+    @media (max-width: 768px) { body { padding: 20px; } .fixed-nav-button { position: static; transform: none; width: auto; height: auto; border-radius: var(--border-radius-md); padding: 12px 15px; font-size: 14px; margin: 0 5px; white-space: normal; } .fixed-nav-button .icon { font-size: 16px; } .fixed-nav-button.fixed-nav-prev .icon { margin-right: 6px; } .fixed-nav-button.fixed-nav-next .icon { margin-left: 6px; } .mobile-navigation-container { display: flex; justify-content: space-between; align-items: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--color-border); } .fixed-nav-button.fixed-nav-prev, .fixed-nav-button.fixed-nav-next { flex-grow: 1; margin: 0 5px; text-align: center; } }
+    .status { font-size: 16px; font-weight: 500; margin-bottom: 30px; margin-top: 10px; padding: 14px 18px; border-radius: var(--border-radius-md); text-align: center; }
+    .status.recorded { background-color: var(--color-success-light); color: var(--color-success-text); border: 1px solid var(--color-success); }
+    .status.not-recorded { background-color: var(--color-warning-light); color: var(--color-warning-text); border: 1px solid var(--color-warning); }
+    
+    /* ======================================================== */
+    /* DÉBUT DES MODIFICATIONS DE STYLE                         */
+    /* ======================================================== */
+    .page-top-bar { max-width: 960px; margin: 0 auto 30px auto; padding: 12px 20px; background-color: var(--color-bg-container); border: 1px solid var(--color-border); border-radius: var(--border-radius-lg); box-shadow: var(--shadow-md); display: flex; align-items: center; justify-content: space-between; }
+    .user-info-block { display: flex; align-items: center; gap: 10px; color: var(--color-text-secondary); }
+    .user-info-block .icon { width: 20px; height: 20px; stroke: var(--color-text-subtle); }
+    .user-info-text { font-size: 14px; }
+    .user-info-text strong { color: var(--color-text-primary); font-weight: 600; text-transform: capitalize; }
+    .logout-link { display: flex; align-items: center; gap: 8px; text-decoration: none; background-color: #fee2e2; color: var(--color-danger); padding: 8px 14px; border-radius: var(--border-radius-md); font-size: 14px; font-weight: 600; transition: all 0.2s; }
+    .logout-link .icon { width: 18px; height: 18px; stroke: var(--color-danger); transition: transform 0.2s; }
+    .logout-link:hover { background-color: #fecaca; color: var(--color-danger-hover); }
+    .logout-link:hover .icon { transform: translateX(2px); }
+
+    /* Styles pour l'overlay (MODIFIÉS POUR GÉRER L'ÉTAT D'ERREUR) */
+    #upload-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255, 255, 255, 0.85); backdrop-filter: blur(4px); z-index: 9999; display: none; flex-direction: column; justify-content: center; align-items: center; text-align: center; cursor: default; }
+    .loader { border: 8px solid var(--color-bg-alt); border-top: 8px solid var(--color-primary); border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; }
+    #upload-overlay p { margin-top: 20px; font-size: 18px; font-weight: 500; color: var(--color-text-primary); max-width: 80%; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .checkmark { width: 60px; height: 60px; border-radius: 50%; display: none; stroke-width: 5; stroke: var(--color-success); stroke-miterlimit: 10; animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both; }
+    .checkmark__circle { stroke-dasharray: 166; stroke-dashoffset: 166; stroke-width: 5; stroke: var(--color-success); fill: none; animation: stroke .6s cubic-bezier(0.65, 0, 0.45, 1) forwards; }
+    .checkmark__check { transform-origin: 50% 50%; stroke-dasharray: 48; stroke-dashoffset: 48; animation: stroke .3s cubic-bezier(0.65, 0, 0.45, 1) .8s forwards; }
+    @keyframes stroke { 100% { stroke-dashoffset: 0; } } @keyframes scale { 0%, 100% { transform: none; } 50% { transform: scale3d(1.1, 1.1, 1); } } @keyframes fill { 100% { box-shadow: inset 0px 0px 0px 30px var(--color-success); } }
+    .error-cross { width: 60px; height: 60px; display: none; }
+    .error-cross_circle { stroke: var(--color-danger); stroke-width: 5; fill: rgba(220, 38, 38, 0.1); }
+    .error-cross_line { stroke: var(--color-danger); stroke-width: 5; stroke-linecap: round; }
+    #overlay-close-btn { display: none; margin-top: 25px; padding: 10px 25px; font-size: 16px; font-weight: 500; border: none; border-radius: var(--border-radius-md); background-color: var(--color-primary); color: var(--color-text-inverse); cursor: pointer; transition: background-color 0.2s; }
+    #overlay-close-btn:hover { background-color: var(--color-primary-hover); }
+    #upload-overlay.loading .loader, #upload-overlay.success .checkmark, #upload-overlay.error .error-cross { display: block; }
+    #upload-overlay .loader, #upload-overlay .checkmark, #upload-overlay .error-cross { display: none; }
+    #upload-overlay.error #overlay-close-btn { display: inline-block; }
+    /* ======================================================== */
+    /* FIN DES MODIFICATIONS DE STYLE                           */
+    /* ======================================================== */
+  </style>
+</head>
+<body>
+
+    <div id="upload-overlay">
+      <div class="loader"></div>
+      <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52"><circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/><path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/></svg>
+      <svg class="error-cross" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52"><circle class="error-cross_circle" cx="26" cy="26" r="25"/><path class="error-cross_line" d="M16 16 36 36 M36 16 16 36"/></svg>
+      <p id="overlay-message"></p>
+      <button id="overlay-close-btn">OK</button>
+    </div>
+
+    <div class="mobile-navigation-container"> 
+        <form method="POST" action="{{ url_for('previous_phrase') }}" style="display: contents;"><button type="submit" class="fixed-nav-button fixed-nav-prev" title="Phrase précédente" {% if current_phrase_number <= 1 %}disabled{% endif %}><span class="icon">←</span><span class="nav-text">Précédent</span></button></form>
+        <form id="next-phrase-form" method="POST" action="{{ url_for('next_phrase') }}" style="display: contents;"><button type="submit" class="fixed-nav-button fixed-nav-next" title="Phrase suivante" {% if current_phrase_number >= total_phrases %}disabled{% endif %}><span class="nav-text">Suivant</span><span class="icon">→</span></button></form>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- DÉBUT DU BANDEAU UTILISATEUR (NOUVEAU)                 -->
+    <!-- ======================================================== -->
+    {% if session.user %}
+    <header class="page-top-bar">
+        <div class="user-info-block">
+            <span class="user-info-text">
+                Connecté(e) en tant que <strong class="user-name">{{ session.user.prenom }} {{ session.user.nom }}</strong>
+                <!-- <span dir="rtl" style="display: block; font-size: 13px; color: var(--color-text-subtle);">متصل كـ <strong class="user-name">{{ session.user.prenom }} {{ session.user.nom }}</strong></span> -->
+            </span>
+        </div>
+        <a href="{{ url_for('logout') }}" class="logout-link">
+            <span>Déconnexion</span>
+            <span dir="rtl" style="margin-left: 5px;">تسجيل الخروج</span>
+            <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" /></svg>
+        </a>
+    </header>
+    {% endif %}
+    <!-- ======================================================== -->
+    <!-- FIN DU BANDEAU UTILISATEUR                             -->
+    <!-- ======================================================== -->
+
+    <div class="container">
+        <div class="page-header-section">
+            <h1>Enregistrement de Phrase <span dir="rtl">تسجيل الجملة</span></h1>
+            <p class="subtitle">Veuillez lire attentivement la phrase présentée ci-dessous à voix haute, puis validez votre enregistrement.<span class="arabic-label-subtitle" dir="rtl">الرجاء قراءة الجملة المعروضة أدناه بصوت عالٍ وتركيز، ثم تأكيد التسجيل الخاص بك.</span></p>
+            {% if current_phrase_number and total_phrases and total_phrases > 0 %}
+            <p class="phrase-counter">Phrase {{ current_phrase_number }} sur {{ total_phrases }}</p>
+            <div class="progress-indicator"><div class="progress-indicator-fill" style="width: {{ (current_phrase_number / total_phrases) * 100 }}%;"></div></div>
+            {% endif %}
+        </div>
+
+        {% if phrase.tifinagh and phrase.tifinagh|trim != "" %}<div class="phrase-block"><label>Tamazight (Tifinagh) :</label><div class="phrase-text">{{ phrase.tifinagh }}</div></div>{% endif %}
+        {% if phrase.latin != "" %}<div class="phrase-block"><label>{% if session.langue == 'tmz' %}Tamazight (Latin) :{% else %}Darija (Latin) :{% endif %}</label><div class="phrase-text">{{ phrase.latin }}</div></div>{% endif %}
+        {% if phrase.arabe and phrase.arabe|trim != "" %}<div class="phrase-block"><label>Transcription Arabe (phonétique) / <span class="arabic-label" dir="rtl">النقل الصوتي باللغة العربية</span> :</label><div class="phrase-text arabic">{{ phrase.arabe }}</div></div>{% endif %}
+        {% if is_phrase_recorded %}<p class="status recorded">✅ Vous avez déjà enregistré cette phrase.</p>{% else %}<p class="status not-recorded">🟠 Vous n'avez pas encore enregistré cette phrase.</p>{% endif %}
+        {% if reference_audio_url %}<div class="reference-audio-container"><label class="form-section-label">Audio de référence / <span class="arabic-label" dir="rtl">تسجيل صوتي مرجعي</span> :</label><audio controls preload="metadata" src="{{ reference_audio_url }}">Votre navigateur ne supporte pas l'élément audio.</audio></div>{% endif %}
+        
+        <input type="hidden" id="tifinagh" value="{{ phrase.tifinagh or '' }}"><input type="hidden" id="latin" value="{{ phrase.latin or '' }}"><input type="hidden" id="arabe" value="{{ phrase.arabe or '' }}">
+        <div class="buttons">
+            <button id="start">Commencer <span dir="rtl">ابدأ</span></button><button id="stop" disabled>Arrêter <span dir="rtl">أوقف</span></button>
+            <button id="play" disabled>Écouter <span dir="rtl">شغّل</span></button><button id="valider" disabled>Valider <span dir="rtl">تأكيد</span></button>
+        </div>
+        <div class="audio-container"><label class="form-section-label">Votre enregistrement : <span class="arabic-label" dir="rtl">التسجيل الخاص بك:</span></label><audio id="audio" controls></audio></div>
+    </div>
+
+  <script>
+    const startBtn = document.getElementById('start'), stopBtn = document.getElementById('stop'), playBtn = document.getElementById('play'), validateBtn = document.getElementById('valider');
+    const audioPlayer = document.getElementById('audio'), nextPhraseForm = document.getElementById('next-phrase-form');
+    const uploadOverlay = document.getElementById('upload-overlay'), overlayMessage = document.getElementById('overlay-message'), overlayCloseBtn = document.getElementById('overlay-close-btn');
+    let mediaRecorder, audioChunks = [], audioBlob, startTime;
+    startBtn.onclick = async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+            mediaRecorder.ondataavailable = event => { audioChunks.push(event.data); };
+            mediaRecorder.onstart = () => { startTime = new Date(); audioChunks = []; startBtn.disabled = true; stopBtn.disabled = false; playBtn.disabled = true; validateBtn.disabled = true; };
+            mediaRecorder.onstop = () => {
+                const duration = (new Date() - startTime) / 1000;
+                audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                audioPlayer.src = URL.createObjectURL(audioBlob); audioPlayer.dataset.duration = duration.toFixed(2);
+                stopBtn.disabled = true; startBtn.disabled = false; playBtn.disabled = false; validateBtn.disabled = false;
+            }; mediaRecorder.start();
+        } catch (err) { console.error("Erreur d'accès au micro:", err); alert("Erreur: Impossible d'accéder au micro."); }
+    };
+    stopBtn.onclick = () => { if (mediaRecorder && mediaRecorder.state === 'recording') { mediaRecorder.stop(); } };
+    playBtn.onclick = () => { audioPlayer.play(); };
+    overlayCloseBtn.onclick = () => { uploadOverlay.style.display = 'none'; };
+
+    validateBtn.onclick = () => {
+        if (!audioBlob) return;
+        if (!navigator.onLine) {
+            uploadOverlay.className = 'error';
+            overlayMessage.innerHTML = 'Aucune connexion Internet détectée.<br><span dir="rtl">لا يوجد اتصال بالإنترنت.</span>';
+            uploadOverlay.style.display = 'flex';
+            return;
+        }
+        
+        uploadOverlay.className = 'loading';
+        overlayMessage.innerHTML = 'Envoi en cours, veuillez patienter...<br><span dir="rtl">جاري الإرسال، الرجاء الإنتظار...</span>';
+        uploadOverlay.style.display = 'flex';
+        validateBtn.disabled = true;
+        
+        const formData = new FormData();
+        formData.append('audio_data', audioBlob, 'recording.wav');
+        formData.append('duration', audioPlayer.dataset.duration);
+        formData.append('tifinagh', document.getElementById('tifinagh').value);
+        formData.append('latin', document.getElementById('latin').value);
+        formData.append('arabe', document.getElementById('arabe').value);
+
+        fetch("{{ url_for('upload') }}", { method: 'POST', body: formData })
+        .then(response => {
+            if (!response.ok) { return response.json().then(err => { throw new Error(err.message || 'Erreur inconnue du serveur.') }); }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                uploadOverlay.className = 'success';
+                overlayMessage.innerHTML = 'Merci ! Enregistrement réussi.<br><span class="arabic-label-subtitle">شكراً جزيلاً! تم التسجيل بنجاح.</span>';
+                
+                setTimeout(() => {
+                    const isLastPhrase = nextPhraseForm.querySelector('button').disabled;
+                    if (!isLastPhrase) {
+                        nextPhraseForm.submit();
+                    } else {
+                        uploadOverlay.style.display = 'none';
+                        validateBtn.innerHTML = 'Terminé ! <span dir="rtl">تم</span>';
+                        validateBtn.disabled = true;
+                        const container = document.querySelector('.container');
+                        const successDiv = document.createElement('div');
+                        successDiv.className = 'flash-message flash-success';
+                        successDiv.textContent = '✅ Félicitations ! Vous avez terminé toutes les phrases.';
+                        container.prepend(successDiv);
+                        successDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }, 1500);
+
+            } else { throw new Error(data.message || "Le serveur a retourné une erreur."); }
+        })
+        .catch(err => {
+            uploadOverlay.className = 'error';
+            overlayMessage.innerHTML = `Échec de l'envoi :<br><span style="font-weight:normal; font-size: 16px;">${err.message}</span><br><span class="arabic-label-subtitle" dir="rtl" style="margin-top:8px;">الرجاء التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى.</span>`;
+            validateBtn.disabled = false;
+            validateBtn.innerHTML = 'Valider <span dir="rtl">تأكيد</span>';
+        });
+    };
+  </script>
+
+</body>
+</html>

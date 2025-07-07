@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,100..700;1,100..700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: "Josefin Sans", sans-serif; background-color: #f9fafb; }
+    .stat-card { background-color: white; padding: 1.5rem; border-radius: 0.75rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06); }
+    .table-responsive { overflow-x: auto; }
+    th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid #e5e7eb; }
+    th { background-color: #f3f4f6; }
+  </style>
+</head>
+<body class="text-gray-800">
+  <nav class="bg-gray-800 text-white p-4 shadow-md">
+    <div class="container mx-auto flex justify-between items-center">
+      <h1 class="text-xl font-semibold">Tableau de Bord Administrateur</h1>
+      <a href="{{ url_for('admin_logout') }}" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+        Déconnexion
+      </a>
+    </div>
+  </nav>
+
+  <div class="container mx-auto p-6">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="p-3 mb-4 rounded-md 
+            {% if category == 'danger' %}bg-red-100 text-red-700
+            {% elif category == 'success' %}bg-green-100 text-green-700
+            {% elif category == 'warning' %}bg-yellow-100 text-yellow-700
+            {% else %}bg-blue-100 text-blue-700{% endif %}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <!-- Statistiques Générales -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+      <div class="stat-card">
+        <h3 class="text-lg font-semibold text-gray-600">Enregistrements Totaux</h3>
+        <p class="text-3xl font-bold">{{ stats.total_recordings }}</p>
+      </div>
+      <div class="stat-card">
+        <h3 class="text-lg font-semibold text-gray-600">Durée Totale</h3>
+        <p class="text-3xl font-bold">{{ format_duration(stats.total_duration_sec) }}</p>
+      </div>
+      <div class="stat-card">
+        <h3 class="text-lg font-semibold text-gray-600">Participants Uniques</h3>
+        <p class="text-3xl font-bold">{{ stats.user_stats|length }}</p>
+      </div>
+    </div>
+
+    <!-- Graphiques -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      <div class="stat-card">
+        <h3 class="text-xl font-semibold mb-4">Distribution par Genre (Participants)</h3>
+        <canvas id="genderChart"></canvas>
+      </div>
+      <div class="stat-card">
+        <h3 class="text-xl font-semibold mb-4">Activité Quotidienne (Globale)</h3>
+        <canvas id="recordingsPerDayChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Graphique Durée Totale par Utilisateur -->
+    <div class="stat-card mb-8">
+        <h3 class="text-xl font-semibold mb-4">Durée Totale d'Enregistrement par Utilisateur</h3>
+        <canvas id="durationPerUserChart"></canvas>
+    </div>
+
+    <!-- Graphique Durée par Utilisateur par Jour -->
+    <div class="stat-card col-span-2 mb-8">
+        <h3 class="text-xl font-semibold mb-4">Durée d'Enregistrement par Utilisateur par Jour</h3>
+        <canvas id="durationPerUserPerDayChart"></canvas>
+    </div>
+
+    <!-- Statistiques par Utilisateur -->
+    <div class="stat-card mb-8">
+      <h3 class="text-xl font-semibold mb-4">Statistiques par Utilisateur</h3>
+      <div class="table-responsive">
+        <table class="min-w-full">
+          <thead>
+            <tr>
+              <th>Nom Complet</th>
+              <th>Enregistrements</th>
+              <th>Durée Totale</th>
+              <th>Activité Quotidienne (Nb rec. / Durée)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for full_name, user_data in stats.user_stats.items()|sort %}
+            <tr>
+              <td class="font-medium">{{ full_name }}</td>
+              <td>{{ user_data.record_count }}</td>
+              <td>{{ format_duration(user_data.total_duration) }}</td>
+              <td>
+                {% if user_data.daily_activity %}
+                  <ul class="list-disc list-inside text-sm">
+                  {% for day, activity in user_data.daily_activity.items()|sort(reverse=True) %}
+                    <li>{{ day }}: {{ activity.count }} / {{ format_duration(activity.duration) }}</li>
+                  {% endfor %}
+                  </ul>
+                {% else %}
+                  -
+                {% endif %}
+              </td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="4" class="text-center py-4">Aucun utilisateur n'a encore soumis d'enregistrement.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+  </div>
+
+  <script>
+    // Graphique de distribution par genre
+    const genderCtx = document.getElementById('genderChart')?.getContext('2d');
+    if (genderCtx) {
+      const genderData = {{ stats.gender_distribution | tojson }};
+      new Chart(genderCtx, {
+        type: 'pie',
+        data: {
+          labels: Object.keys(genderData),
+          datasets: [{
+            label: 'Distribution par Genre',
+            data: Object.values(genderData),
+            backgroundColor: ['rgba(54, 162, 235, 0.7)', 'rgba(255, 99, 132, 0.7)', 'rgba(255, 206, 86, 0.7)', 'rgba(75, 192, 192, 0.7)'],
+            borderColor: ['rgba(54, 162, 235, 1)', 'rgba(255, 99, 132, 1)', 'rgba(255, 206, 86, 1)', 'rgba(75, 192, 192, 1)'],
+            borderWidth: 1
+          }]
+        },
+        options: { responsive: true, plugins: { legend: { position: 'top' }, tooltip: { callbacks: { label: (c) => `${c.label}: ${c.parsed}%` } } } }
+      });
+    }
+
+    // Graphique des enregistrements par jour
+    const recordingsPerDayCtx = document.getElementById('recordingsPerDayChart')?.getContext('2d');
+    if (recordingsPerDayCtx) {
+        new Chart(recordingsPerDayCtx, {
+            type: 'bar',
+            data: {
+                labels: {{ stats.recordings_per_day_labels | tojson }},
+                datasets: [
+                    { label: "Nb Enregistrements", data: {{ stats.recordings_per_day_data | tojson }}, backgroundColor: 'rgba(75, 192, 192, 0.5)', borderColor: 'rgb(75, 192, 192)', yAxisID: 'y' },
+                    { label: "Durée (min)", data: {{ stats.duration_per_day_data | tojson }}, backgroundColor: 'rgba(255, 159, 64, 0.5)', borderColor: 'rgb(255, 159, 64)', type: 'line', tension: 0.3, yAxisID: 'y1' }
+                ]
+            },
+            options: { responsive: true, scales: { y: { beginAtZero: true, position: 'left', title: { display: true, text: "Nombre d'enregistrements" } }, y1: { beginAtZero: true, position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: "Durée totale (min)" } }, x: { title: { display: true, text: "Date" } } }, plugins: { legend: { position: 'top' } } }
+        });
+    }
+
+    // Graphique durée par utilisateur
+    const durationPerUserCtx = document.getElementById('durationPerUserChart')?.getContext('2d');
+    if (durationPerUserCtx) {
+        new Chart(durationPerUserCtx, {
+            type: 'bar',
+            data: { labels: {{ stats.duration_per_user_labels | tojson }}, datasets: [{ label: 'Durée Totale (min)', data: {{ stats.duration_per_user_data | tojson }}, backgroundColor: 'rgba(153, 102, 255, 0.7)', borderColor: 'rgba(153, 102, 255, 1)', borderWidth: 1 }] },
+            options: { responsive: true, indexAxis: 'y', scales: { x: { beginAtZero: true, title: { display: true, text: 'Durée (minutes)' } } }, plugins: { legend: { display: false } } }
+        });
+    }
+
+    // Graphique durée par utilisateur par jour
+    const durationPerUserPerDayCtx = document.getElementById('durationPerUserPerDayChart')?.getContext('2d');
+    if (durationPerUserPerDayCtx) {
+        new Chart(durationPerUserPerDayCtx, {
+            type: 'line',
+            data: { labels: {{ stats.duration_per_user_per_day_labels | tojson }}, datasets: {{ stats.duration_per_user_per_day_datasets | tojson }} },
+            options: { responsive: true, scales: { y: { beginAtZero: true, title: { display: true, text: 'Durée (minutes)' } }, x: { title: { display: true, text: 'Date' } } }, plugins: { legend: { position: 'top' } } }
+        });
+    }
+  </script>
+</body>
+</html>

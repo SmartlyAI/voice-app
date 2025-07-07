@@ -1,0 +1,6 @@
+Flask
+pandas
+pydub
+huggingface-hub
+gunicorn
+Werkzeug
