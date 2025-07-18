@@ -12,7 +12,9 @@ import io
 from huggingface_hub import HfApi, HfFolder, hf_hub_download
 import logging
 import shutil
+from dotenv import load_dotenv
 
+load_dotenv() 
 app = Flask(__name__)
 app.secret_key = 'une_cle_secrete_tres_securisee_pour_les_sessions_utilisateurs_abc123'
 logging.basicConfig(level=logging.INFO)
@@ -32,21 +34,48 @@ ADMIN_USERNAME = os.environ.get('ADMIN_USER', 'admin')
 ADMIN_PASSWORD = os.environ.get('ADMIN_PASS', 'password123')
 HF_TOKEN = os.environ.get("HF_TOKEN")
 HF_REPO_IDS = { "tmz": "Datasmartly/audio_tamazight_interface", "darija": "Datasmartly/audio_darija_interface" }
-HF_DARIJA_SOURCE_REPO = "Datasmartly/dataset8min"
+HF_DARIJA_SOURCE_REPO = ("Datasmartly/dataset8min", "Datasmartly/dataset-darija-hicham-metadata")
 HF_TMZ_SOURCE_REPOS = ("Datasmartly/audios-tamazight", "Datasmartly/Tamazight-Mega-Corpus")
 SENTENCES_CACHE = {"tmz": [], "darija": []}
 
 # --- FONCTIONS DE CHARGEMENT (INCHANGÉES) ---
-def load_sentences_from_hf_csv(repo_id, filename="metadata.csv"):
+def load_sentences_from_hf_csv(repo_id, filename=None):
     try:
-        app.logger.info(f"TÉLÉCHARGEMENT INITIAL du fichier '{filename}' depuis le dépôt {repo_id}...")
-        csv_path = hf_hub_download(repo_id=repo_id, filename=filename, repo_type="dataset")
-        sentences = [{'latin': r.get('transcription_darija_ltn'), 'arabe': r.get('transcription_darija_ar'), 'audio_filename': r.get('file_name'), 'source_repo': repo_id} for r in csv.DictReader(open(csv_path, mode='r', encoding='utf-8'))]
-        app.logger.info(f"{len(sentences)} phrases Darija chargées avec succès.")
+        # Détermine le nom du fichier à chercher
+        target_filename = filename if filename else (
+            "phrases-darija.csv" if "darija-hicham" in repo_id else "metadata.csv"
+        )
+        
+        app.logger.info(f"TÉLÉCHARGEMENT du fichier '{target_filename}' depuis {repo_id}...")
+        csv_path = hf_hub_download(repo_id=repo_id, filename=target_filename, repo_type="dataset")
+        
+        sentences = []
+        with open(csv_path, mode='r', encoding='utf-8') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                # Gère les deux formats de fichiers
+                if "darija-hicham" in repo_id:
+                    sentences.append({
+                        'latin': row.get('darija_ltn', '').strip(),
+                        'arabe': row.get('darija_ar', '').strip(),
+                        'audio_filename': None,  # Ce dataset n'a pas d'audio
+                        'source_repo': repo_id
+                    })
+                else:
+                    sentences.append({
+                        'latin': row.get('transcription_darija_ltn', '').strip(),
+                        'arabe': row.get('transcription_darija_ar', '').strip(),
+                        'audio_filename': row.get('file_name'),
+                        'source_repo': repo_id
+                    })
+        
+        app.logger.info(f"{len(sentences)} phrases Darija chargées depuis {repo_id}")
         return sentences
+        
     except Exception as e:
-        app.logger.error(f"Impossible de télécharger/lire '{filename}' depuis '{repo_id}': {e}", exc_info=True)
+        app.logger.error(f"Erreur avec {repo_id}: {e}", exc_info=True)
         return []
+    
 def load_tamazight_with_audio_from_hf(repo_id):
     app.logger.info(f"Chargement des données Tamazight AVEC AUDIO depuis le dépôt HF : {repo_id}")
     try:
@@ -78,12 +107,27 @@ def load_tamazight_text_only_from_hf(repo_id):
     except Exception as e:
         app.logger.error(f"Erreur critique lors de l'accès au dépôt {repo_id}: {e}", exc_info=True)
         return []
+
 def populate_sentences_cache():
-    app.logger.info("--- DÉBUT DU PRÉ-CHARGEMENT DES DONNÉES DANS LE CACHE ---")
-    tmz_sentences = []; tmz_sentences.extend(load_tamazight_with_audio_from_hf(HF_TMZ_SOURCE_REPOS[0])); tmz_sentences.extend(load_tamazight_text_only_from_hf(HF_TMZ_SOURCE_REPOS[1]))
-    SENTENCES_CACHE["tmz"] = tmz_sentences; SENTENCES_CACHE["darija"] = load_sentences_from_hf_csv(HF_DARIJA_SOURCE_REPO)
-    app.logger.info("--- FIN DU PRÉ-CHARGEMENT DES DONNÉES. CACHE PRÊT. ---")
-    app.logger.info(f"Contenu du cache : {len(SENTENCES_CACHE['tmz'])} phrases TMZ, {len(SENTENCES_CACHE['darija'])} phrases Darija.")
+    app.logger.info("--- DÉBUT DU PRÉ-CHARGEMENT DES DONNÉES ---")
+    
+    # Chargement Darija (multi-sources)
+    darija_sentences = []
+    for repo_id in HF_DARIJA_SOURCE_REPO:
+        sentences = load_sentences_from_hf_csv(repo_id)
+        darija_sentences.extend(sentences)
+    SENTENCES_CACHE["darija"] = darija_sentences
+    
+    # Chargement Tamazight (inchangé)
+    tmz_sentences = []
+    tmz_sentences.extend(load_tamazight_with_audio_from_hf(HF_TMZ_SOURCE_REPOS[0]))
+    tmz_sentences.extend(load_tamazight_text_only_from_hf(HF_TMZ_SOURCE_REPOS[1]))
+    SENTENCES_CACHE["tmz"] = tmz_sentences
+    
+    app.logger.info("--- CACHE PRÊT ---")
+    app.logger.info(f"TMZ: {len(SENTENCES_CACHE['tmz'])} phrases | Darija: {len(SENTENCES_CACHE['darija'])} phrases")
+
+
 def load_sentences(langue):
     return SENTENCES_CACHE.get(langue, [])
 
