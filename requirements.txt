@@ -4,3 +4,4 @@ pydub
 huggingface-hub
 gunicorn
 Werkzeug
+dotenv
